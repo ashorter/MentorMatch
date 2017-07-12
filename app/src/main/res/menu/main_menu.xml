@@ -3,17 +3,17 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/sign_out_menu"
-        android:title="@string/sign_out"
+        android:title="Sign Out"
         app:showAsAction="never"/>
     <item
         android:id="@+id/fresh_config_menu"
-        android:title="@string/fresh_config"
+        android:title="Fresh Config"
         app:showAsAction="never"/>
     <item
         android:id="@+id/invite_menu"
-        android:title="@string/invite_menu_label"
+        android:title="Invite"
         app:showAsAction="never"/>
     <item
         android:id="@+id/crash_menu"
-        android:title="@string/cause_crash"/>
+        android:title="Cause Crash"/>
 </menu>
