@@ -10,7 +10,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
+
+import com.firebase.client.Firebase;
+import com.firebase.geofire.GeoFire;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -24,6 +29,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class MapsActivity extends AppCompatActivity
@@ -39,11 +52,38 @@ public class MapsActivity extends AppCompatActivity
     Location mLastLocation;
     Marker mCurrLocationMarker;
 
+    private Button mSaveButton;
+    private DatabaseReference mDatabase;
+    private DatabaseReference refDatabase;
+
+    // Sample users
+    private static final LatLng P1 = new LatLng(38.723728, -90.313485);
+
+    private Marker mP1;
+
+    // Initializaing: This is where my data is stored
+    final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference ref = database.getReference("server/saving-data/fireblog");
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        // Save location
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Navigation");
+        refDatabase = FirebaseDatabase.getInstance().getReference().child("Location");
+
+        SupportMapFragment mapFragment = (SupportMapFragment)
+                getSupportFragmentManager()
+                        .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        mSaveButton = (Button) findViewById(R.id.buttonSave);
+        mDatabase =
+                FirebaseDatabase.getInstance().getReference().child("Navigation");
+        refDatabase =
+                FirebaseDatabase.getInstance().getReference().child("Location");
 
         getSupportActionBar().setTitle("Map Location Activity");
 
@@ -62,10 +102,25 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap)
-    {
-        mGoogleMap=googleMap;
+    public void onMapReady(GoogleMap googleMap) {
+        mGoogleMap = googleMap;
+        //mMap=googleMap;
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+        // Place random markers
+
+        //    googleMap.addMarker(new MarkerOptions()
+        //            .position(new LatLng(38.723728, -90.313485))
+        //            .title("Hello world"));
+
+        if(googleMap!=null) {
+            mP1 = mGoogleMap.addMarker(new MarkerOptions()
+                    .position(P1)
+                    .title("Richard Robertson")
+                    .snippet("IT Director"));
+                   // .icon(BitmapDescriptorFactory.fromResource(R.drawable.p1)));
+            mP1.setTag(0);
+        }
 
         //Initialize Google Play Services
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -79,11 +134,77 @@ public class MapsActivity extends AppCompatActivity
                 //Request Location Permission
                 checkLocationPermission();
             }
-        }
-        else {
+        } else {
             buildGoogleApiClient();
             mGoogleMap.setMyLocationEnabled(true);
         }
+
+        mGoogleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+
+            @Override
+            public void onMapLongClick(LatLng point) {
+                // TODO Auto-generated method stub
+
+                // added marker saved as marker and coordinates passed to latlng
+                Marker marker = mGoogleMap.addMarker(new
+                        MarkerOptions().position(point));
+                final LatLng latlng = marker.getPosition();
+
+                mSaveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        DatabaseReference newPost = mDatabase.child("Location").push();
+                        newPost.setValue(latlng);
+                    }
+                });
+
+            }
+        });
+
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
+            mGoogleMap.setMyLocationEnabled(true);
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]
+                        {Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
+            }
+
+        }
+
+        refDatabase.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                LatLng newLocation = new LatLng(
+                        dataSnapshot.child("latitude").getValue(Long.class),
+                        dataSnapshot.child("longitude").getValue(Long.class)
+                );
+                mGoogleMap.addMarker(new MarkerOptions()
+                        .position(newLocation)
+                        .title(dataSnapshot.getKey()));
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -175,6 +296,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
@@ -206,5 +328,4 @@ public class MapsActivity extends AppCompatActivity
             // permissions this app might request
         }
     }
-
 }

@@ -5,18 +5,32 @@ package com.example.ashley.mentormatch;
  */
 
 public class UserInformation {
+    private String name;
+    private String university;
+    private String location;
 
-    public String name;
-    public String interest;
-    public String number;
-
-    public UserInformation(){
-
+    public UserInformation() {
+      /*Blank default constructor essential for Firebase*/
+    }
+    public String getName() {
+        return name;
     }
 
-    public UserInformation(String name, String number, String interest) {
+    public void setName(String name) {
         this.name = name;
-        this.number = number;
-        this.interest = interest;
+    }
+    public String getUniversity() {
+        return university;
+    }
+
+    public void setUniversity(String university) {
+        this.university = university;
+    }
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }

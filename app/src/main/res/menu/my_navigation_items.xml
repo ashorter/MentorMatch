@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-<item android:id="@+id/action_search"
+<item android:id="@+id/action_profile"
     android:title="Profile"
     android:icon="@drawable/ic_person_black_24dp" />
-<item android:id="@+id/action_settings"
+<item android:id="@+id/action_nearby"
     android:title="Nearby"
     android:icon="@drawable/ic_person_pin_circle_black_24dp" />
-<item android:id="@+id/action_navigation"
+<item android:id="@+id/action_messaging"
     android:title="Messaging"
     android:icon="@drawable/ic_textsms_black_24dp" />
 </menu>
