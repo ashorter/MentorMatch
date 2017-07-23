@@ -33,7 +33,7 @@ public class HomeActivity extends Activity {
         }
     public void signUp(View view)
     {
-        Intent intent = new Intent(HomeActivity.this, MainActivity.class);
+        Intent intent = new Intent(HomeActivity.this, MainMsgActivity.class);
         startActivity(intent);
     }
 }
