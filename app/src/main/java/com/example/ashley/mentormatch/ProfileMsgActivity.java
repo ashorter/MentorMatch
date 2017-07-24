@@ -56,7 +56,7 @@ public class ProfileMsgActivity extends AppCompatActivity {
     private DatabaseReference mCurrentUserDatabaseReference;
     private Context mView;
     private FirebaseAuth firebaseAuth;
-    private TextView textViewUserEmail;
+    private TextView textViewUsername;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -74,10 +74,10 @@ public class ProfileMsgActivity extends AppCompatActivity {
         FirebaseUser user = firebaseAuth.getCurrentUser();
 
         //initializing views
-        textViewUserEmail = (TextView) findViewById(R.id.textViewUserEmail);
+        textViewUsername = (TextView) findViewById(R.id.textViewUsername);
 
         //displaying logged in user name
-        textViewUserEmail.setText("Welcome "+ user.getEmail());
+        textViewUsername.setText("Hello "+ user.getDisplayName());
     }
 
     @Override

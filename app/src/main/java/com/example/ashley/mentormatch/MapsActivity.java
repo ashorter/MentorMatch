@@ -39,13 +39,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.example.ashley.mentormatch.FriendsListActivity.encodeEmail;
+import static com.example.ashley.mentormatch.R.id.map;
 
 
 public class MapsActivity extends AppCompatActivity
-        implements OnMapReadyCallback,
+        implements
+        OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
+
+    //GoogleMap.OnInfoWindowClickListener,
 
     GoogleMap mGoogleMap;
     SupportMapFragment mapFrag;
@@ -58,12 +62,17 @@ public class MapsActivity extends AppCompatActivity
     private DatabaseReference mDatabase;
     private DatabaseReference refDatabase;
 
+    private FirebaseDatabase mFirebaseDatabase;
+    private FirebaseAuth mFirebaseAuth;
+
     // Sample users
     private static final LatLng P1 = new LatLng(38.723728, -90.313485);
     private static final LatLng P2 = new LatLng(39.102518, -84.514230);
+    private static final LatLng P3 = new LatLng(39.100675, -84.515197);
 
     private Marker mP1;
     private Marker mP2;
+    private Marker mP3;
 
     // Initializaing: This is where my data is stored
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -81,7 +90,7 @@ public class MapsActivity extends AppCompatActivity
 
         SupportMapFragment mapFragment = (SupportMapFragment)
                 getSupportFragmentManager()
-                        .findFragmentById(R.id.map);
+                        .findFragmentById(map);
         mapFragment.getMapAsync(this);
         mSaveButton = (Button) findViewById(R.id.buttonSave);
         mDatabase =
@@ -91,7 +100,7 @@ public class MapsActivity extends AppCompatActivity
 
         getSupportActionBar().setTitle("Map Location Activity");
 
-        mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(map);
         mapFrag.getMapAsync(this);
     }
 
@@ -111,6 +120,8 @@ public class MapsActivity extends AppCompatActivity
         //mMap=googleMap;
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
+       // mGoogleMap.setOnInfoWindowClickListener(this);
+
         // Place random markers
 
         //    googleMap.addMarker(new MarkerOptions()
@@ -118,7 +129,7 @@ public class MapsActivity extends AppCompatActivity
         //            .title("Hello world"));
 
         if(googleMap!=null) {
-            mP1 = mGoogleMap.addMarker(new MarkerOptions()
+            Marker mP1 = mGoogleMap.addMarker(new MarkerOptions()
                     .position(P1)
                     .title("Richard Robertson")
                     .snippet("IT Director"));
@@ -127,8 +138,12 @@ public class MapsActivity extends AppCompatActivity
             mP2 = mGoogleMap.addMarker(new MarkerOptions()
                     .position(P2)
                     .title("Tonji Zimmerman")
-                    .snippet("Software Developer"));
+                    .snippet("Sr. Software Developer"));
             mP2.setTag(0);
+            mP3 = mGoogleMap.addMarker(new MarkerOptions()
+                    .position(P3)
+                    .title("John Cooper")
+                    .snippet("Engineer"));
         }
 
         //Initialize Google Play Services
@@ -187,9 +202,6 @@ public class MapsActivity extends AppCompatActivity
                         dataSnapshot.child("latitude").getValue(Long.class),
                         dataSnapshot.child("longitude").getValue(Long.class)
                 );
-                mGoogleMap.addMarker(new MarkerOptions()
-                        .position(newLocation)
-                        .title(dataSnapshot.getKey()));
             }
 
             @Override
@@ -335,6 +347,22 @@ public class MapsActivity extends AppCompatActivity
             // permissions this app might request
         }
     }
+/**
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        addNewFriend("bdpa@gmail,com");
+    }
 
-
+    private void addNewFriend(String newFriendEmail){
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        //Get current user logged in by email
+        final String userLoggedIn = mFirebaseAuth.getCurrentUser().getEmail();
+        //Log.e(TAG, "User logged in is: " + userLoggedIn);
+        //final String newFriendEncodedEmail = encodeEmail(newFriendEmail);
+        final DatabaseReference friendsRef = mFirebaseDatabase.getReference(Constants.FRIENDS_LOCATION
+                + "/" + encodeEmail(userLoggedIn));
+        //Add friends to current users friends list
+        friendsRef.child(encodeEmail(newFriendEmail)).setValue(newFriendEmail);
+    }
+ **/
 }
